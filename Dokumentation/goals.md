@@ -1,8 +1,13 @@
+# Purpose {#Purpose}
+
+A Post process adds traceability between artifats to to documentation generated with Doxygen. 
+
 # Goals {#Goals}
 
-## Purpose {#Purpose}
-
-
+[$Goal 1]
+The postprocessor supports the user of the documentation with navigation within the documentation. 
+ 
+ 
 Mit Doxygen werden Dokumentationen erzeugt, diese sind aber nicht verknüpft. 
 Dazu werden in der Dokumentation Tags eingebaut, die die Beziehung der 
 Dokumente wiedergeben. Grundsätzlich können beliebige Tags definiert werden. 

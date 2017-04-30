@@ -42,8 +42,8 @@ public class ReadData {
 		getValues(new File(basePathName), aktivität.einlesen);
 
 		// Liste der Tags links oben ausgaben
-		GenerateHTMLTags.printHTML(listeTags, nodeQuelleList, listeTyp, nodeLinkList);
-		GenerateHTMLNil.printHTML(FileName.getNilName());
+		GenerateHTML.printHTMLTags(listeTags, nodeQuelleList, listeTyp, nodeLinkList);
+		GenerateHTML.printHTMLNil(FileName.getNilName());
 
 		getValues(new File(basePathName), aktivität.schreiben);
 	}
@@ -95,7 +95,7 @@ public class ReadData {
 
 									String newName;
 									if (wert.getName().equals("index.html")) {
-										GenerateHTMLFrames.printHTML(name);
+										GenerateHTML.printHTMLFrame(name);
 									}
 									newName = name.replace("index.html", "indexDoxygen.html");
 									FileWriter fw = new FileWriter(newName);
