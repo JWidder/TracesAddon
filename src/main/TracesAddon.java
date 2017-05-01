@@ -11,35 +11,45 @@ import org.ini4j.Wini;
 
 public class TracesAddon {
 	public static void main(String[] args) {
-		
+
 		System.out.println("Inifile einlesen");
 		// Inifile einlesen
 		List<NodeTag> listeTags;
 		List<NodeTyp> listeTyp;
-        try {
+		try {
 			Wini ini = new Wini(new File("traces.ini"));
-			
-			Set<String> setStringsLinks=ini.get("Typ").keySet();
-			listeTyp = new ArrayList<>(setStringsLinks.size());			
+
+			Set<String> setStringsLinks = ini.get("Typ").keySet();
+			listeTyp = new ArrayList<>(setStringsLinks.size());
 			for (String name : setStringsLinks) {
-				NodeTyp tag = new NodeTyp();
-				tag.setName(ini.get("Typ",name));
-				listeTyp.add(tag);
+				listeTyp.add(new NodeTyp(ini.get("Typ", name)));
 			}
-			
-			
-			Set<String> setStringsTags=ini.get("Tags").keySet();
-			listeTags = new ArrayList<>(setStringsTags.size());			
+
+			Set<String> setStringsTags = ini.get("Tags").keySet();
+			listeTags = new ArrayList<>(setStringsTags.size());
 			for (String name : setStringsTags) {
-				NodeTag tag = new NodeTag();
-				tag.setName(ini.get("Tags",name));
-				listeTags.add(tag);
+				listeTags.add(new NodeTag(ini.get("Tags", name)));
 			}
-			new ReadData(args[0],listeTags,listeTyp);
-			
-		} catch (InvalidFileFormatException e) {
+			new ReadData(args[0], listeTags, listeTyp);
+
+		} catch (ExceptionParser e) {
+			System.out.println();
+			System.out.println("=================================================");
+			System.out.println("The program detected an input error while parsing");
+			System.out.println();
+			System.out.print(e.getMessage());
+			System.out.println();
+			System.out.println();
+			System.out.print("Program aborts");
+			System.out.println();
+			System.out.println();
+		}
+		catch (InvalidFileFormatException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

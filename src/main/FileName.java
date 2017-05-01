@@ -23,6 +23,7 @@ public class FileName {
 	public static String getTagListeName() {
 		return String.format(pattern, path, "Tags");
 	}
+
 	public static String getRelTagListeName() {
 		return String.format(relPattern, "Tags");
 	}
@@ -37,6 +38,7 @@ public class FileName {
 	public static String getSourceName(NodeTag nodeTag) {
 		return String.format(pattern, path, nodeTag.getName());
 	}
+
 	public static String getRelSourceName(NodeTag nodeTag) {
 		return String.format(relPattern, nodeTag.getName());
 	}
@@ -48,6 +50,7 @@ public class FileName {
 	public static String getLinkName(NodeSource nodeQuelle) {
 		return String.format(pattern, path, String.format("%s_%s", nodeQuelle.getName(), nodeQuelle.getNummer()));
 	}
+
 	public static String getRelLinkName(NodeSource nodeQuelle) {
 		return String.format(relPattern, String.format("%s_%s", nodeQuelle.getName(), nodeQuelle.getNummer()));
 	}
@@ -55,7 +58,16 @@ public class FileName {
 	public static String getNilName() {
 		return String.format(pattern, path, "Nil");
 	}
+
 	public static String getRelNilName() {
 		return String.format(relPattern, "Nil");
+	}
+
+	public static String getRelDxygeDokuName() {
+		return ("indexDoxygen.html");
+	}
+
+	public static String getRelIndexName() {
+		return ("index.html");
 	}
 }

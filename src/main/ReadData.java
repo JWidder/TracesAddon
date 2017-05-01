@@ -18,9 +18,9 @@ import java.util.List;
  */
 public class ReadData {
 
-	List<NodeSource> nodeQuelleList = new ArrayList<>();
-	List<NodeTarget> nodeLinkList = new ArrayList<>();
-	// String ausgabe = "html\\$$$%s.html";
+	private List<NodeSource> nodeQuelleList = new ArrayList<>();
+	private List<NodeTarget> nodeLinkList = new ArrayList<>();
+	// private List<NodeTyp> nodeTypList;
 
 	/**
 	 * 
@@ -33,30 +33,34 @@ public class ReadData {
 	 * @param listeTyp
 	 *            Typen von Verbindungen, die für diese Struktur im Inifile
 	 *            definiert wurden.
-	 * @throws IOException
+	 * @throws IOException 
+	 * @throws Exception
 	 */
-	public ReadData(String basePathName, List<NodeTag> listeTags, List<NodeTyp> listeTyp) throws IOException {
+	public ReadData(String basePathName, List<NodeTag> listeTags, List<NodeTyp> listeTyp) throws ExceptionParser, IOException {
 		nodeLinkList.clear();
 		nodeQuelleList.clear();
+		// nodeTypList = listeTyp;
 
-		getValues(new File(basePathName), aktivität.einlesen);
+		getValues(new File(basePathName), aktivität.einlesen, listeTags, listeTyp);
 
 		// Liste der Tags links oben ausgaben
 		GenerateHTML.printHTMLTags(listeTags, nodeQuelleList, listeTyp, nodeLinkList);
 		GenerateHTML.printHTMLNil(FileName.getNilName());
 
-		getValues(new File(basePathName), aktivität.schreiben);
+		getValues(new File(basePathName), aktivität.schreiben, listeTags, listeTyp);
 	}
 
 	/**
 	 * Konstruktor speziell für den Test.
+	 * 
+	 * @param listeNodeTag
 	 */
-	public ReadData() {
+	public ReadData(List<NodeTag> listeNodeTag, List<NodeTyp> listeTyp) {
 		return;
 	}
 
 	enum status {
-		LESE_BUCHSTABE, WAIT_DOLLAR, START_IDENTIFIER, READ_IDENTIFIER, ENDE_IDENTIFIER, READ_START_NEXT_IDENTIFIER, READ_NEXT_IDENTIFIER, END_NEXT_IDENTIFIER, state9a, state9b, state10, state11, state12, state13, stateError
+		LESE_BUCHSTABE, WAIT_DOLLAR, START_IDENTIFIER, READ_IDENTIFIER, ENDE_IDENTIFIER, READ_START_NEXT_IDENTIFIER, READ_NEXT_IDENTIFIER, END_NEXT_IDENTIFIER, ERKENNE_NUMBER, ERKENNE_NUMBER_1, ENDE_ERKENNE_NUMBER, state11, state12, state13, stateError
 	};
 
 	public enum aktivität {
@@ -71,12 +75,16 @@ public class ReadData {
 	 * @param inFile
 	 * @param inAktivität
 	 *            Während dem Durchgang auszuführende Aktivitäten.
+	 * @param listeTags
+	 * @param listeTyp
+	 * @throws Exception
 	 */
-	public void getValues(File inFile, aktivität inAktivität) {
+	public void getValues(File inFile, aktivität inAktivität, List<NodeTag> listeTags, List<NodeTyp> listeTyp)
+			throws ExceptionParser {
 		File[] entries = inFile.listFiles();
 		for (File wert : entries) {
 			if (wert.isDirectory()) {
-				getValues(wert, inAktivität);
+				getValues(wert, inAktivität, listeTags, listeTyp);
 			} else {
 				String extension = this.getFileExtendsion(wert);
 				if (extension.equals("html") || extension.equals("htm")) {
@@ -88,16 +96,16 @@ public class ReadData {
 						String fileName = wert.getName();
 						if (!wert.getName().contains("trace_data")) {
 							if (!wert.getName().startsWith("$")) {
-								String ausgabe = readData(reader, fileName, inAktivität);
+								String ausgabe = readData(reader, fileName, inAktivität, listeTags, listeTyp);
 								if (inAktivität == aktivität.schreiben) {
 									String name = wert.getAbsolutePath();
 									wert.delete();
 
 									String newName;
-									if (wert.getName().equals("index.html")) {
+									if (wert.getName().equals(FileName.getRelIndexName())) {
 										GenerateHTML.printHTMLFrame(name);
 									}
-									newName = name.replace("index.html", "indexDoxygen.html");
+									newName = name.replace(FileName.getRelIndexName(), FileName.getRelDxygeDokuName());
 									FileWriter fw = new FileWriter(newName);
 									BufferedWriter bw = new BufferedWriter(fw);
 									bw.write(ausgabe);
@@ -136,14 +144,18 @@ public class ReadData {
 	 * @param inReader
 	 * @param fileName
 	 * @param inAktivität
+	 * @param listeNodeTag
+	 * @param listeNodeTyp
 	 * @return
-	 * @throws IOException
+	 * @throws IOException 
+	 * @throws Exception
 	 */
-	public String readData(Reader inReader, String fileName, aktivität inAktivität) throws IOException {
-		StringBuilder wort1 = new StringBuilder();
-		StringBuilder wort2 = new StringBuilder();
-		StringBuilder wort3 = new StringBuilder();
-		StringBuilder wort4 = new StringBuilder();
+	public String readData(Reader inReader, String fileName, aktivität inAktivität, List<NodeTag> listeNodeTag,
+			List<NodeTyp> listeNodeTyp) throws ExceptionParser, IOException {
+		StringBuilder nameTagTyp = new StringBuilder();
+		StringBuilder nameTag = new StringBuilder();
+		StringBuilder nameNummer = new StringBuilder();
+		StringBuilder nummber = new StringBuilder();
 
 		StringBuilder ausgabe = new StringBuilder();
 
@@ -191,8 +203,8 @@ public class ReadData {
 			case START_IDENTIFIER:
 				if (Character.isJavaIdentifierStart(ch)) {
 					zustand = status.READ_IDENTIFIER;
-					wort1.setLength(0);
-					wort1.append((char) ch);
+					nameTagTyp.setLength(0);
+					nameTagTyp.append((char) ch);
 					if (aktivität.schreiben == inAktivität) {
 						reserve.append((char) ch);
 					}
@@ -205,7 +217,7 @@ public class ReadData {
 				break;
 			case READ_IDENTIFIER:
 				if (Character.isJavaIdentifierPart(ch)) {
-					wort1.append((char) ch);
+					nameTagTyp.append((char) ch);
 					if (aktivität.schreiben == inAktivität) {
 						reserve.append((char) ch);
 					}
@@ -230,9 +242,9 @@ public class ReadData {
 					}
 				} else {
 					if (Character.isDigit(ch)) {
-						zustand = status.state9b;
-						wort3.setLength(0);
-						wort3.append((char) ch);
+						zustand = status.ERKENNE_NUMBER_1;
+						nameNummer.setLength(0);
+						nameNummer.append((char) ch);
 						if (aktivität.schreiben == inAktivität) {
 							reserve.append((char) ch);
 						}
@@ -254,8 +266,8 @@ public class ReadData {
 			case READ_START_NEXT_IDENTIFIER:
 				if (Character.isJavaIdentifierStart(ch)) {
 					zustand = status.READ_NEXT_IDENTIFIER;
-					wort2.setLength(0);
-					wort2.append((char) ch);
+					nameTag.setLength(0);
+					nameTag.append((char) ch);
 					if (aktivität.schreiben == inAktivität) {
 						reserve.append((char) ch);
 					}
@@ -268,14 +280,14 @@ public class ReadData {
 				break;
 			case READ_NEXT_IDENTIFIER:
 				if (Character.isJavaIdentifierStart(ch)) {
-					wort2.append((char) ch);
+					nameTag.append((char) ch);
 					if (aktivität.schreiben == inAktivität) {
 						reserve.append((char) ch);
 					}
 				} else {
 					if (Character.isWhitespace(ch)) {
 						// Erstes Wort erkannt
-						System.out.println(String.format(">>> %s", wort2));
+						System.out.println(String.format(">>> %s", nameTag));
 						zustand = status.END_NEXT_IDENTIFIER;
 						if (aktivität.schreiben == inAktivität) {
 							reserve.append((char) ch);
@@ -295,9 +307,9 @@ public class ReadData {
 					}
 				} else {
 					if (Character.isDigit(ch)) {
-						wort3.setLength(0);
-						wort3.append((char) ch);
-						zustand = status.state9a;
+						nameNummer.setLength(0);
+						nameNummer.append((char) ch);
+						zustand = status.ERKENNE_NUMBER;
 						if (aktivität.schreiben == inAktivität) {
 							reserve.append((char) ch);
 						}
@@ -316,23 +328,25 @@ public class ReadData {
 					}
 				}
 				break;
-			case state9a:
+			case ERKENNE_NUMBER:
 				if (Character.isDigit(ch)) {
-					// zustand = status.state9a;
-					wort3.append((char) ch);
+					nameNummer.append((char) ch);
 					if (aktivität.schreiben == inAktivität) {
 						reserve.append((char) ch);
 					}
 				} else {
 					if (Character.isWhitespace(ch)) {
-						zustand = status.state10;
+						zustand = status.ENDE_ERKENNE_NUMBER;
 						switch (inAktivität) {
 						case einlesen:
-							createLink(fileName, wort1, wort2, wort3);
+							checkLinkTyp(nameTagTyp, listeNodeTyp);
+							checkLinkTag(nameTag, listeNodeTag);
+							createLink(fileName, nameTagTyp, nameTag, nameNummer);
 							break;
 						case schreiben:
 							reserve.append((char) ch);
-							ausgabe.append(this.ausgabeLink(reserve.toString(),wort1.toString(), wort2.toString(), wort3.toString()));
+							ausgabe.append(this.ausgabeLink(reserve.toString(), nameTagTyp.toString(),
+									nameTag.toString(), nameNummer.toString()));
 							break;
 						}
 					} else {
@@ -340,11 +354,14 @@ public class ReadData {
 							zustand = status.LESE_BUCHSTABE;
 							switch (inAktivität) {
 							case einlesen:
-								createLink(fileName, wort1, wort2, wort3);
+								checkLinkTyp(nameTagTyp, listeNodeTyp);
+								checkLinkTag(nameTag, listeNodeTag);
+								createLink(fileName, nameTagTyp, nameTag, nameNummer);
 								break;
 							case schreiben:
 								reserve.append((char) ch);
-								ausgabe.append(this.ausgabeLink(reserve.toString(), wort1.toString(), wort2.toString(), wort3.toString()));
+								ausgabe.append(this.ausgabeLink(reserve.toString(), nameTagTyp.toString(),
+										nameTag.toString(), nameNummer.toString()));
 								break;
 							}
 						} else {
@@ -356,39 +373,44 @@ public class ReadData {
 					}
 				}
 				break;
-			case state9b: // Ziffer in Quelle Erkannt
+			case ERKENNE_NUMBER_1: // Ziffer in Quelle Erkannt
 				if (Character.isDigit(ch)) {
-					wort3.append((char) ch);
+					nameNummer.append((char) ch);
 					if (aktivität.schreiben == inAktivität) {
 						reserve.append((char) ch);
 					}
 				} else {
 					if (Character.isWhitespace(ch)) {
-						zustand = status.state10;
+						zustand = status.ENDE_ERKENNE_NUMBER;
 						switch (inAktivität) {
 						case einlesen:
-							this.createNodeQuelle(fileName, wort1.toString(), wort3.toString());
+							checkLinkTag(nameTagTyp, listeNodeTag);
+							this.createNodeQuelle(fileName, nameTagTyp.toString(), nameNummer.toString(), listeNodeTag);
 							break;
 						case schreiben:
 							reserve.append((char) ch);
-							ausgabe.append(this.ausgabeQuelle(reserve.toString(), wort1.toString(), wort3.toString()));
+							ausgabe.append(this.ausgabeQuelle(reserve.toString(), nameTagTyp.toString(),
+									nameNummer.toString()));
 							break;
 						}
 					} else {
 						if (Character.isJavaIdentifierStart(ch)) {
-							wort4.setLength(ch);
-							wort4.append((char) ch);
+							nummber.setLength(ch);
+							nummber.append((char) ch);
 							zustand = status.state11;
 						} else {
 							if (ch == ']') {
 								zustand = status.LESE_BUCHSTABE;
 								switch (inAktivität) {
 								case einlesen:
-									this.createNodeQuelle(fileName, wort1.toString(), wort3.toString());
+									checkLinkTag(nameTagTyp, listeNodeTag);
+									this.createNodeQuelle(fileName, nameTagTyp.toString(), nameNummer.toString(),
+											listeNodeTag);
 									break;
 								case schreiben:
 									reserve.append((char) ch);
-									ausgabe.append(this.ausgabeQuelle(reserve.toString(), wort1.toString(), wort3.toString()));
+									ausgabe.append(this.ausgabeQuelle(reserve.toString(), nameTagTyp.toString(),
+											nameNummer.toString()));
 									break;
 								}
 							} else {
@@ -405,7 +427,7 @@ public class ReadData {
 					}
 				}
 				break;
-			case state10:
+			case ENDE_ERKENNE_NUMBER:
 				if (Character.isWhitespace(ch)) {
 					zustand = status.ENDE_IDENTIFIER;
 					if (aktivität.schreiben == inAktivität) {
@@ -427,11 +449,10 @@ public class ReadData {
 				break;
 			case state11:
 				if (Character.isJavaIdentifierPart(ch)) {
-					wort4.append((char) ch);
-					// zustand = status.state11;
+					nummber.append((char) ch);
 				} else {
 					if (Character.isWhitespace(ch)) {
-						zustand = status.state10;
+						zustand = status.ENDE_ERKENNE_NUMBER;
 					} else {
 						if (ch == ']') {
 							zustand = status.LESE_BUCHSTABE;
@@ -454,6 +475,46 @@ public class ReadData {
 
 	/**
 	 * 
+	 * @param inTyp
+	 * @param inTag
+	 * @param listeTag
+	 * @param listeTyp
+	 * @throws Exception
+	 */
+	private void checkLinkTyp(StringBuilder inTyp, List<NodeTyp> listeTyp) throws ExceptionParser {
+		boolean status = false;
+
+		for (NodeTyp node : listeTyp) {
+			if (node.getName().equals(inTyp.toString())) {
+				status = true;
+			}
+		}
+		if (status == false) {
+			throw new ExceptionParser(String.format("Typ: %s is not defined in Inifile", inTyp.toString()));
+		}
+	}
+
+	/**
+	 * Verifies whether the link 
+	 * @param inTag
+	 * @param listeTag
+	 * @throws Exception
+	 */
+	private void checkLinkTag(StringBuilder inTag, List<NodeTag> listeTag) throws ExceptionParser {
+		boolean status = false;
+
+		for (NodeTag node : listeTag) {
+			if (node.getName().equals(inTag.toString())) {
+				status = true;
+			}
+		}
+		if (status == false) {
+			throw new ExceptionParser(String.format("Tag: %s is not defined in Inifile", inTag.toString()));
+		}
+	}
+
+	/**
+	 * 
 	 * 
 	 * @param fileName
 	 * @param inTyp
@@ -470,8 +531,36 @@ public class ReadData {
 	 * @param inFileName
 	 * @param inTag
 	 * @param inNummer
+	 * @throws Exception
 	 */
-	private void createNodeQuelle(String inFileName, String inTag, String inNummer) {
+	private void createNodeQuelle(String inFileName, String inTag, String inNummer, List<NodeTag> listeTag)
+			throws ExceptionParser {
+		// Check whether the node is alread defined
+		for (NodeSource node : nodeQuelleList) {
+			if (node.getName().equals(inTag) & node.getNummer().equals(inNummer)) {
+				StringBuilder errorMessage = new StringBuilder();
+				errorMessage.append(String.format("Multiple defined Tag \"%s\"\n",inTag.toString()));
+				for (NodeSource nodeError : nodeQuelleList)
+				{
+					if (nodeError.getName().equals(inTag) & nodeError.getNummer().equals(inNummer))
+					{
+						errorMessage.append(String.format("Tag \"%s\" is already declared in: %s", inTag,nodeError.getFileName()));
+					}
+				}
+				throw new ExceptionParser(errorMessage.toString());
+			}
+		}
+		// Check whether the type is declared ini Ini-File
+		boolean status = false;
+		for (NodeTag node : listeTag) {
+			if (node.getName().equals(inTag)) {
+				status = true;
+			}
+		}
+		if (status == false) {
+			throw new ExceptionParser("Undefined Tag");
+		}
+		// Add Node to List
 		NodeSource nodeQuelle = new NodeSource(inFileName, inTag, inNummer);
 		this.nodeQuelleList.add(nodeQuelle);
 	}
@@ -484,20 +573,21 @@ public class ReadData {
 	 * @param inTag
 	 * @param inNummer
 	 * 
-	 * return
+	 *            return
 	 */
 	private String ausgabeLink(String eingabe, String inTyp, String inTag, String inNummer) {
 		// Suche die Referenz
-		//for (NodeSource node : this.nodeQuelleList) {
-			//if (node.getName().equals(inTag) && node.getNummer().equals(inNummer)) {
-				//if (node.getName().startsWith("FMEA")) {
-					// TODO Als Link ausgeben.
-					//return (eingabe);
-				//}
-			//}
-		//}
+		// for (NodeSource node : this.nodeQuelleList) {
+		// if (node.getName().equals(inTag) &&
+		// node.getNummer().equals(inNummer)) {
+		// if (node.getName().startsWith("FMEA")) {
+		// TODO Als Link ausgeben.
+		// return (eingabe);
+		// }
+		// }
+		// }
 		// Dieser Zustand dürfte nie Eintreten
-		// TODO Exception werfen, wenn Node nicht erkannt wurde. 
+		// TODO Exception werfen, wenn Node nicht erkannt wurde.
 		return eingabe;
 	}
 
@@ -520,5 +610,4 @@ public class ReadData {
 	List<NodeTarget> getNodeLink() {
 		return this.nodeLinkList;
 	}
-
 }

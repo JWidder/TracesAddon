@@ -3,6 +3,13 @@ package main;
 public class NodeTag {
 	private String name;
 
+	
+	
+	public NodeTag(String name) {
+		super();
+		this.name = name;
+	}
+
 	public String getName() {
 		return name;
 	}

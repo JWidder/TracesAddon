@@ -47,7 +47,7 @@ public abstract class GenerateHTML {
 		L1FrameSet.addContent(L2bFrameSet);
 
 		L2bFrameSet
-				.addContent(new Element("frame").setAttribute("name", "doku").setAttribute("src", "indexDoxygen.html"));
+				.addContent(new Element("frame").setAttribute("name", "doku").setAttribute("src", FileName.getRelDxygeDokuName()));
 		L2bFrameSet.addContent(
 				new Element("frame").setAttribute("name", "details").setAttribute("src", FileName.getRelNilName()));
 

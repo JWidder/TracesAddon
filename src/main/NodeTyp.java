@@ -1,6 +1,10 @@
 package main;
 
 public class NodeTyp {
+	public NodeTyp(String name) {
+		this.name = name;
+	}
+
 	private String name;
 
 	public String getName() {
