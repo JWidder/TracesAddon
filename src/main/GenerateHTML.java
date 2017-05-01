@@ -188,6 +188,7 @@ public abstract class GenerateHTML {
 												.setAttribute("href", nodeLink.getFileName())
 												.setAttribute("title", "Beschreibung der Klasse")
 												.setAttribute("target", "details")));
+
 							}
 						}
 					}
