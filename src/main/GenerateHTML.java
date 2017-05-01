@@ -27,40 +27,39 @@ public abstract class GenerateHTML {
 		Format expanded = Format.getPrettyFormat().setExpandEmptyElements(true);
 		XMLOutputter out = new XMLOutputter(expanded);
 
-		Element element = addHeader("Sources");
-
-		Element L1FrameSet = new Element("frameset").setAttribute("id", "mainframe").setAttribute("cols", "20%, 80%");
-		element.addContent(L1FrameSet);
-
-		Element L2aFrameSet = new Element("frameset").setAttribute("id", "mainframe").setAttribute("rows",
-				"20%, 50%, 30%");
-		L1FrameSet.addContent(L2aFrameSet);
-
-		L2aFrameSet.addContent(
-				new Element("frame").setAttribute("name", "tags").setAttribute("src", FileName.getRelTagListeName()));
-		L2aFrameSet.addContent(
-				new Element("frame").setAttribute("name", "source").setAttribute("src", FileName.getRelNilName()));
-		L2aFrameSet.addContent(
-				new Element("frame").setAttribute("name", "target").setAttribute("src", FileName.getRelNilName()));
-
-		Element L2bFrameSet = new Element("frameset").setAttribute("id", "mainframe").setAttribute("rows", "50%, 50%");
-		L1FrameSet.addContent(L2bFrameSet);
-
-		L2bFrameSet
-				.addContent(new Element("frame").setAttribute("name", "doku").setAttribute("src", FileName.getRelDxygeDokuName()));
-		L2bFrameSet.addContent(
-				new Element("frame").setAttribute("name", "details").setAttribute("src", FileName.getRelNilName()));
+		Element element = addHeader("Sources")
+				.addContent(new Element("frameset").setAttribute("id", "mainframe").setAttribute("cols", "20%, 80%")
+						.addContent(new Element("frameset").setAttribute("id", "mainframe")
+								.setAttribute("rows", "20%, 50%, 30%")
+								.addContent(new Element("frame").setAttribute("name", "tags").setAttribute("src",
+										FileName.getRelTagListeName()))
+								.addContent(new Element("frame").setAttribute("name", "source")
+										.setAttribute("src", FileName.getRelNilName()))
+								.addContent(new Element("frame").setAttribute("name", "target").setAttribute("src",
+										FileName.getRelNilName())))
+						.addContent(
+								new Element("frameset").setAttribute("id", "mainframe").setAttribute("rows", "50%, 50%")
+										.addContent(new Element("frame").setAttribute("name", "doku")
+												.setAttribute("src", FileName.getRelDxygeDokuName()))
+										.addContent(new Element("frame").setAttribute("name", "details")
+												.setAttribute("src", FileName.getRelNilName()))));
 
 		outFile(inName, out.outputString(element));
 	}
 
-	static void printHTMLNil(String inName) throws IOException {
+	/**
+	 * 
+	 * 
+	 * @throws IOException
+	 */
+	static void printHTMLNil() throws IOException {
 		Format expanded = Format.getPrettyFormat().setExpandEmptyElements(true);
 		XMLOutputter out = new XMLOutputter(expanded);
 
-		Element element = new Element("html").addContent(new Element("head"));
-		element.addContent(new Element("body").addContent(new Element("p").setText("Leer")));
-		outFile(inName, out.outputString(element));
+		Element element = new Element("html").addContent(new Element("head"))
+				.addContent(new Element("body").addContent(new Element("p").setText("Leer")));
+
+		outFile(FileName.getNilName(), out.outputString(element));
 	}
 
 	/**
@@ -76,25 +75,29 @@ public abstract class GenerateHTML {
 		Format expanded = Format.getPrettyFormat().setExpandEmptyElements(true);
 		XMLOutputter out = new XMLOutputter(expanded);
 
-		Element element = new Element("html");
-		element.addContent(new Element("title").setText("Sources"));
+		Element element = new Element("html").addContent(new Element("title").setText("Sources"));
 		Element body = new Element("body");
 		element.addContent(body);
 
-		// Schleife über allen Typen von Tags, die in der ini-Datei
-		// definiert sind.
+		int count = 0;
 		for (NodeSource node : listeSource) {
 			if (node.getName().equals(inNodeTag.getName())) {
+				count++;
+			}
+		}
+		if (count == 0) {
+			body.addContent(new Element("p").setText(String.format("No reference for: %s", inNodeTag.getName())));
+		} else {
+			for (NodeSource node : listeSource) {
+				if (node.getName().equals(inNodeTag.getName())) {
+					body.addContent(new Element("p").addContent(new Element("a")
+							.setText(String.format("%s %s", node.getName(), node.getNummer()))
+							.setAttribute("href", FileName.getRelLinkName(node)).setAttribute("target", "target")
+							.setAttribute("title", "Beschreibung der Klasse").setAttribute("onclick",
+									String.format("top.doku.location='%s'; return true;", node.getFileName()))));
 
-				Element link = new Element("p").setText(inNodeTag.getName());
-				body.addContent(link);
-
-				link.addContent(new Element("a").setText(node.getName())
-						.setAttribute("href", FileName.getRelLinkName(node)).setAttribute("target", "target")
-						.setAttribute("title", "Beschreibung der Klasse").setAttribute("onclick",
-								String.format("top.doku.location='%s'; return true;", node.getFileName())));
-
-				GenerateHTML.printHTMLTarget(node, listeTyp, nodeLinkListe);
+					GenerateHTML.printHTMLLink(node, listeTyp, nodeLinkListe);
+				}
 			}
 		}
 
@@ -138,31 +141,61 @@ public abstract class GenerateHTML {
 	 * @param nodeLinkList
 	 * @throws IOException
 	 */
-	static void printHTMLTarget(NodeSource nodeQuelle, List<NodeTyp> listeTyp, List<NodeTarget> nodeLinkList)
+	static void printHTMLLink(NodeSource nodeQuelle, List<NodeTyp> listeTyp, List<NodeTarget> nodeLinkList)
 			throws IOException {
 		Format expanded = Format.getPrettyFormat().setExpandEmptyElements(true);
 		XMLOutputter out = new XMLOutputter(expanded);
 
 		Element element = addHeader("Sources");
-		Element body = new Element("body");
+		Element body = new Element("body").addContent(
+				new Element("h3").setText(String.format("Links: %s %s", nodeQuelle.getName(), nodeQuelle.getNummer())));
 		element.addContent(body);
 
+		// Count number of referencwes
+		int count = 0;
 		for (NodeTyp node : listeTyp) {
-			Element link = new Element("p").setText(node.getName());
-			body.addContent(link);
 			for (NodeTarget nodeLink : nodeLinkList) {
 				if (nodeLink.getTyp().equals(node.getName())) {
 					if (nodeQuelle.getName().equals(nodeLink.getName())
 							& nodeQuelle.getNummer().equals(nodeLink.getNummer())) {
-						link.addContent(new Element("p").setText(String.format("%s %s %s", nodeLink.getFileName(),
-								nodeLink.getTyp(), nodeLink.getName())));
-						link.addContent(new Element("a").setText(nodeLink.getName()))
-								.setAttribute("href", nodeLink.getFileName())
-								.setAttribute("title", "Beschreibung der Klasse").setAttribute("target", "details");
+						count++;
 					}
 				}
 			}
 		}
+		if (count == 0) {
+			body.addContent(new Element("p").setText("No Links"));
+		} else {
+			for (NodeTyp node : listeTyp) {
+				int countLink = 0;
+				for (NodeTarget nodeLink : nodeLinkList) {
+					if (nodeLink.getTyp().equals(node.getName())) {
+						if (nodeQuelle.getName().equals(nodeLink.getName())
+								& nodeQuelle.getNummer().equals(nodeLink.getNummer())) {
+							countLink++;
+						}
+					}
+				}
+				if (countLink == 0) {
+					body.addContent(new Element("p").setText(String.format("%s: no Element", node.getName())));
+				} else {
+					for (NodeTarget nodeLink : nodeLinkList) {
+						if (nodeLink.getTyp().equals(node.getName())) {
+							if (nodeQuelle.getName().equals(nodeLink.getName())
+									& nodeQuelle.getNummer().equals(nodeLink.getNummer())) {
+								body.addContent(new Element("p").setText(node.getName())
+										.addContent(new Element("a").setText(nodeLink.getName())
+												.setAttribute("href", nodeLink.getFileName())
+												.setAttribute("title", "Beschreibung der Klasse")
+												.setAttribute("target", "details")));
+
+							}
+						}
+					}
+				}
+			}
+		}
+
 		outFile(FileName.getLinkName(nodeQuelle), out.outputString(element));
 	}
 

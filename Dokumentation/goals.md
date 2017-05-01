@@ -14,7 +14,7 @@ Dokumente wiedergeben. Grundsätzlich können beliebige Tags definiert werden.
 
    [$Cust 1] 
    
-Test {#CUST1}   
+[$Test $Cust 2]   
    
    
  - Es können zum einen freie Tags vernwedet werden, die dann aber nicht gepüft 

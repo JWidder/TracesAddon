@@ -45,7 +45,7 @@ public class ReadData {
 
 		// Liste der Tags links oben ausgaben
 		GenerateHTML.printHTMLTags(listeTags, nodeQuelleList, listeTyp, nodeLinkList);
-		GenerateHTML.printHTMLNil(FileName.getNilName());
+		GenerateHTML.printHTMLNil();
 
 		getValues(new File(basePathName), aktivität.schreiben, listeTags, listeTyp);
 	}
