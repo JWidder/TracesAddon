@@ -47,17 +47,17 @@ public abstract class GenerateHTML {
 						.addContent(new Element("frameset").setAttribute("id", "mainframe")
 								.setAttribute("rows", "20%, 50%, 30%")
 								.addContent(new Element("frame").setAttribute("name", "tags").setAttribute("src",
-										FileName.getRelTagListeName()))
+										FileUtils.getRelTagListeName()))
 								.addContent(new Element("frame").setAttribute("name", "source")
-										.setAttribute("src", FileName.getRelNilName()))
+										.setAttribute("src", FileUtils.getRelNilName()))
 								.addContent(new Element("frame").setAttribute("name", "target").setAttribute("src",
-										FileName.getRelNilName())))
+										FileUtils.getRelNilName())))
 						.addContent(
 								new Element("frameset").setAttribute("id", "mainframe").setAttribute("rows", "50%, 50%")
 										.addContent(new Element("frame").setAttribute("name", "doku")
-												.setAttribute("src", FileName.getRelDxygeDokuName()))
+												.setAttribute("src", FileUtils.getRelDxygeDokuName()))
 										.addContent(new Element("frame").setAttribute("name", "details")
-												.setAttribute("src", FileName.getRelNilName()))));
+												.setAttribute("src", FileUtils.getRelNilName()))));
 
 		outFile(inName, out.outputString(element));
 	}
@@ -74,7 +74,7 @@ public abstract class GenerateHTML {
 		Element element = new Element("html").addContent(new Element("head"))
 				.addContent(new Element("body").addContent(new Element("p").setText("Leer")));
 
-		outFile(FileName.getNilName(), out.outputString(element));
+		outFile(FileUtils.getNilName(), out.outputString(element));
 	}
 
 	/**
@@ -107,7 +107,7 @@ public abstract class GenerateHTML {
 				if (node.getName().equals(inNodeTag.getName())) {
 					body.addContent(new Element("p").addContent(new Element("a")
 							.setText(String.format("%s %s", node.getName(), node.getNummer()))
-							.setAttribute("href", FileName.getRelLinkName(node)).setAttribute("target", "target")
+							.setAttribute("href", FileUtils.getRelLinkName(node)).setAttribute("target", "target")
 							.setAttribute("title", "Beschreibung der Klasse").setAttribute("onclick",
 									String.format("top.doku.location='%s'; return true;", node.getFileName()))));
 
@@ -116,7 +116,7 @@ public abstract class GenerateHTML {
 			}
 		}
 
-		outFile(FileName.getSourceName(inNodeTag), out.outputString(element));
+		outFile(FileUtils.getSourceName(inNodeTag), out.outputString(element));
 	}
 
 	/**
@@ -141,12 +141,12 @@ public abstract class GenerateHTML {
 			body.addContent(link);
 
 			link.addContent(new Element("a").setText(nodeTag.getName())
-					.setAttribute("href", FileName.getRelSourceName(nodeTag)).setAttribute("target", "source"));
+					.setAttribute("href", FileUtils.getRelSourceName(nodeTag)).setAttribute("target", "source"));
 
 			GenerateHTML.printHTMLSource(listeSource, listeTyp, listeLink, nodeTag);
 		}
 
-		outFile(FileName.getTagListeName(), out.outputString(element));
+		outFile(FileUtils.getTagListeName(), out.outputString(element));
 	}
 
 	/**
@@ -211,7 +211,7 @@ public abstract class GenerateHTML {
 			}
 		}
 
-		outFile(FileName.getLinkName(nodeQuelle), out.outputString(element));
+		outFile(FileUtils.getLinkName(nodeQuelle), out.outputString(element));
 	}
 
 	/**************************************************************************/

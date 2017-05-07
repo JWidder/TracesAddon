@@ -15,12 +15,18 @@
 
 package main;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+
 /**
  * Die Klasse stellt die Namen der evrschiedenen Dateien bereit.
  * 
  * @author Johannes Widder
  */
-public class FileName {
+public class FileUtils {
 	private static String path = "html\\";
 	private static String pattern = "%s$$$%s.html";
 	private static String relPattern = "$$$%s.html";

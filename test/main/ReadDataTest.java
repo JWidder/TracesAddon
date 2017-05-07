@@ -47,8 +47,15 @@ public class ReadDataTest {
 
 		ReadData readData = new ReadData(listeNodeTag, listeNodeTyp);
 
-		StringReader testInput = new StringReader("test [$Test $Cust 2] Ende [$Test $Cust 23] ");
+		String input = "test [$Test $Cust 2] Ende [$Test $Cust 23] ";
+		StringReader testInput = new StringReader(input);
 		readData.readData(testInput, "FileName", aktivität.einlesen, listeNodeTag, listeNodeTyp);
+		testInput.close();
+
+		testInput = new StringReader(input);
+		String result = readData.readData(testInput, "FileName", aktivität.schreiben, listeNodeTag, listeNodeTyp);
+		assertEquals(input, result);
+		testInput.close();
 
 		assertEquals(2, readData.getNodeLink().size());
 		assertEquals("Test", readData.getNodeLink().get(0).getTyp());
@@ -74,9 +81,16 @@ public class ReadDataTest {
 
 		ReadData readData = new ReadData(listeNodeTag, listeNodeTyp);
 
-		StringReader testInput = new StringReader("test [$Cust 2] Ende [$Cust 23] ");
-
+		String input = "test [$Cust 2] Ende [$Cust 23] ";
+		StringReader testInput = new StringReader(input);
 		readData.readData(testInput, "FileName", aktivität.einlesen, listeNodeTag, listeNodeTyp);
+		testInput.close();
+
+		testInput = new StringReader(input);
+		String result = readData.readData(testInput, "FileName", aktivität.schreiben, listeNodeTag, listeNodeTyp);
+		testInput.close();
+
+		assertEquals(input, result);
 
 		assertEquals(2, readData.getNodeQuelle().size());
 		assertEquals("Cust", readData.getNodeQuelle().get(0).getName());
@@ -207,7 +221,7 @@ public class ReadDataTest {
 		} catch (Exception e) {
 			assertTrue(true);
 		}
-		
+
 		assertEquals(1, readData.getNodeQuelle().size());
 	}
 
@@ -239,21 +253,19 @@ public class ReadDataTest {
 		} catch (Exception e) {
 			assertTrue(true);
 		}
-		
-		try{
+
+		try {
 			readData.readData(testInput2, "FileName", aktivität.einlesen, listeNodeTag, listeNodeTyp);
-			fail("Should have thrown an exception");			
-		}
-		catch(Exception e){
+			fail("Should have thrown an exception");
+		} catch (Exception e) {
 			assertTrue(true);
 		}
 
 		assertEquals(0, readData.getNodeQuelle().size());
 	}
 
-	
 	/**
-	 * Dies prüft
+	 * Test whether multible tags trigger an exception.
 	 * 
 	 * @throws Exception
 	 */
@@ -279,8 +291,246 @@ public class ReadDataTest {
 		} catch (Exception e) {
 			assertTrue(true);
 		}
-		
+
 		assertEquals(1, readData.getNodeQuelle().size());
 	}
 
+	/**
+	 * Test whether multible tags trigger an exception.
+	 * 
+	 * @throws Exception
+	 */
+	@SuppressWarnings("static-method")
+	@Test
+	public void testReadDataFalsePositive() throws Exception {
+
+		List<NodeTyp> listeNodeTyp = new ArrayList<>(2);
+		listeNodeTyp.add(new NodeTyp("Satisfies"));
+		listeNodeTyp.add(new NodeTyp("Test"));
+
+		List<NodeTag> listeNodeTag = new ArrayList<>();
+		listeNodeTag.add(new NodeTag("Cust"));
+		listeNodeTag.add(new NodeTag("Det"));
+
+		ReadData readData = new ReadData(listeNodeTag, listeNodeTyp);
+
+		String input = "test [$Cust] Ende [$Cus] ";
+		StringReader testInput1 = new StringReader(input);
+		readData.readData(testInput1, "FileName", aktivität.einlesen, listeNodeTag, listeNodeTyp);
+		testInput1.close();
+		testInput1 = new StringReader(input);
+		String result = readData.readData(testInput1, "FileName", aktivität.schreiben, listeNodeTag, listeNodeTyp);
+		testInput1.close();
+		assertEquals(input, result);
+
+		assertEquals(0, readData.getNodeQuelle().size());
+	}
+
+	/**
+	 * Test whether multible tags trigger an exception.
+	 * 
+	 * @throws Exception
+	 */
+	@SuppressWarnings("static-method")
+	@Test
+	public void testReadDataFalsePositive2() throws Exception {
+
+		List<NodeTyp> listeNodeTyp = new ArrayList<>(2);
+		listeNodeTyp.add(new NodeTyp("Satisfies"));
+		listeNodeTyp.add(new NodeTyp("Test"));
+
+		List<NodeTag> listeNodeTag = new ArrayList<>();
+		listeNodeTag.add(new NodeTag("Cust"));
+		listeNodeTag.add(new NodeTag("Det"));
+
+		ReadData readData = new ReadData(listeNodeTag, listeNodeTyp);
+
+		String input = "t [$Cust 1 ]";
+		StringReader testInput1 = new StringReader(input);
+		readData.readData(testInput1, "FileName", aktivität.einlesen, listeNodeTag, listeNodeTyp);
+		testInput1.close();
+		testInput1 = new StringReader(input);
+		String result = readData.readData(testInput1, "FileName", aktivität.schreiben, listeNodeTag, listeNodeTyp);
+		testInput1.close();
+		assertEquals(input, result);
+
+		assertEquals(1, readData.getNodeQuelle().size());
+	}
+
+	/**
+	 * Test whether multible tags trigger an exception.
+	 * 
+	 * @throws Exception
+	 */
+	@SuppressWarnings("static-method")
+	@Test
+	public void testReadDataFalsePositive3() throws Exception {
+
+		List<NodeTyp> listeNodeTyp = new ArrayList<>(2);
+		listeNodeTyp.add(new NodeTyp("Satisfies"));
+		listeNodeTyp.add(new NodeTyp("Test"));
+
+		List<NodeTag> listeNodeTag = new ArrayList<>();
+		listeNodeTag.add(new NodeTag("Cust"));
+		listeNodeTag.add(new NodeTag("Det"));
+
+		ReadData readData = new ReadData(listeNodeTag, listeNodeTyp);
+
+		String input = "t [$Cust 1 a]";
+		try {
+			StringReader testInput1 = new StringReader(input);
+			readData.readData(testInput1, "FileName", aktivität.einlesen, listeNodeTag, listeNodeTyp);
+			fail("Exception expected");
+
+		} catch (ExceptionParser e) {
+			assertTrue(true);
+		}
+	}
+
+	/**
+	 * Test whether multible tags trigger an exception.
+	 * 
+	 * @throws Exception
+	 */
+	@SuppressWarnings("static-method")
+	@Test
+	public void testReadDataFalsePositive4() throws Exception {
+
+		List<NodeTyp> listeNodeTyp = new ArrayList<>(2);
+		listeNodeTyp.add(new NodeTyp("Satisfies"));
+		listeNodeTyp.add(new NodeTyp("Test"));
+
+		List<NodeTag> listeNodeTag = new ArrayList<>();
+		listeNodeTag.add(new NodeTag("Cust"));
+		listeNodeTag.add(new NodeTag("Det"));
+
+		ReadData readData = new ReadData(listeNodeTag, listeNodeTyp);
+
+		String input = "t [$Test $Cust 1 a]";
+		try {
+			StringReader testInput1 = new StringReader(input);
+			readData.readData(testInput1, "FileName", aktivität.einlesen, listeNodeTag, listeNodeTyp);
+			fail("Exception expected");
+
+		} catch (ExceptionParser e) {
+			assertTrue(true);
+		}
+	}
+
+	/**
+	 * Test whether multible tags trigger an exception.
+	 * 
+	 * @throws Exception
+	 */
+	@SuppressWarnings("static-method")
+	@Test
+	public void testReadDataFalsePositive5() throws Exception {
+
+		List<NodeTyp> listeNodeTyp = new ArrayList<>(2);
+		listeNodeTyp.add(new NodeTyp("Satisfies"));
+		listeNodeTyp.add(new NodeTyp("Test"));
+
+		List<NodeTag> listeNodeTag = new ArrayList<>();
+		listeNodeTag.add(new NodeTag("Cust"));
+		listeNodeTag.add(new NodeTag("Det"));
+
+		ReadData readData = new ReadData(listeNodeTag, listeNodeTyp);
+
+		try {
+			String input = "t [$Test a $Cust 1 a]";
+			StringReader testInput1 = new StringReader(input);
+			readData.readData(testInput1, "FileName", aktivität.einlesen, listeNodeTag, listeNodeTyp);
+			fail("Exception expected");
+
+		} catch (ExceptionParser e) {
+			assertTrue(true);
+		}
+	}
+
+	/**
+	 * Test
+	 * 
+	 * @throws Exception
+	 */
+	@SuppressWarnings("static-method")
+	@Test
+	public void testReadDataFalsePositive6() throws Exception {
+
+		List<NodeTyp> listeNodeTyp = new ArrayList<>(2);
+		listeNodeTyp.add(new NodeTyp("Satisfies"));
+		listeNodeTyp.add(new NodeTyp("Test"));
+
+		List<NodeTag> listeNodeTag = new ArrayList<>();
+		listeNodeTag.add(new NodeTag("Cust"));
+		listeNodeTag.add(new NodeTag("Det"));
+
+		ReadData readData = new ReadData(listeNodeTag, listeNodeTyp);
+
+		try {
+			String input = "t [$Test $Cust a 1]";
+			StringReader testInput1 = new StringReader(input);
+			readData.readData(testInput1, "FileName", aktivität.einlesen, listeNodeTag, listeNodeTyp);
+			fail("Exception expected");
+
+		} catch (ExceptionParser e) {
+			assertTrue(true);
+		}
+	}
+
+	/**
+	 * Test
+	 * 
+	 * @throws Exception
+	 */
+	@SuppressWarnings("static-method")
+	@Test
+	public void testReadDataFalsePositive7() throws Exception {
+
+		List<NodeTyp> listeNodeTyp = new ArrayList<>(2);
+		listeNodeTyp.add(new NodeTyp("Satisfies"));
+		listeNodeTyp.add(new NodeTyp("Test"));
+
+		List<NodeTag> listeNodeTag = new ArrayList<>();
+		listeNodeTag.add(new NodeTag("Cust"));
+		listeNodeTag.add(new NodeTag("Det"));
+
+		ReadData readData = new ReadData(listeNodeTag, listeNodeTyp);
+
+		try {
+			String input = "t [$T£est $Cust 1]";
+			StringReader testInput1 = new StringReader(input);
+			readData.readData(testInput1, "FileName", aktivität.einlesen, listeNodeTag, listeNodeTyp);
+			fail("Exception expected");
+
+		} catch (ExceptionParser e) {
+			assertTrue(true);
+		}
+	}
+
+	/**
+	 * Test
+	 * 
+	 * @throws Exception
+	 */
+	@SuppressWarnings("static-method")
+	@Test
+	public void testReadDataFalsePositive8() throws Exception {
+
+		List<NodeTyp> listeNodeTyp = new ArrayList<>(2);
+		listeNodeTyp.add(new NodeTyp("Satisfies"));
+		listeNodeTyp.add(new NodeTyp("Test"));
+
+		List<NodeTag> listeNodeTag = new ArrayList<>();
+		listeNodeTag.add(new NodeTag("Cust"));
+		listeNodeTag.add(new NodeTag("Det"));
+
+		ReadData readData = new ReadData(listeNodeTag, listeNodeTyp);
+
+		String input = "t [$1 Test $Cust 1]";
+		StringReader testInput1 = new StringReader(input);
+		readData.readData(testInput1, "FileName", aktivität.einlesen, listeNodeTag, listeNodeTyp);
+		testInput1 = new StringReader(input);
+		String result = readData.readData(testInput1, "FileName", aktivität.schreiben, listeNodeTag, listeNodeTyp);
+		assertEquals(input, result);
+	}
 }

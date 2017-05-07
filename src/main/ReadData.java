@@ -15,11 +15,14 @@
 
 package main;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +38,6 @@ public class ReadData {
 
 	private List<NodeSource> nodeQuelleList = new ArrayList<>();
 	private List<NodeTarget> nodeLinkList = new ArrayList<>();
-	// private List<NodeTyp> nodeTypList;
 
 	/**
 	 * 
@@ -48,10 +50,11 @@ public class ReadData {
 	 * @param listeTyp
 	 *            Typen von Verbindungen, die für diese Struktur im Inifile
 	 *            definiert wurden.
-	 * @throws IOException 
+	 * @throws IOException
 	 * @throws Exception
 	 */
-	public ReadData(String basePathName, List<NodeTag> listeTags, List<NodeTyp> listeTyp) throws ExceptionParser, IOException {
+	public ReadData(String basePathName, List<NodeTag> listeTags, List<NodeTyp> listeTyp)
+			throws ExceptionParser, IOException {
 		nodeLinkList.clear();
 		nodeQuelleList.clear();
 		// nodeTypList = listeTyp;
@@ -87,40 +90,76 @@ public class ReadData {
 	 * HTML-Dateien eingelesen. Im zweiten Durchgang werden die Links in die
 	 * Dateien eingetragen.
 	 * 
-	 * @param inFile
+	 * Tests:
+	 * 
+	 * - Was passiert, wenn inDriectory ein Datei und kein verzeichnis ist.
+	 * 
+	 * @param inDirectory
 	 * @param inAktivität
 	 *            Während dem Durchgang auszuführende Aktivitäten.
 	 * @param listeTags
 	 * @param listeTyp
+	 * @throws IOException
+	 * 
 	 * @throws Exception
 	 */
-	public void getValues(File inFile, aktivität inAktivität, List<NodeTag> listeTags, List<NodeTyp> listeTyp)
-			throws ExceptionParser {
-		File[] entries = inFile.listFiles();
-		for (File wert : entries) {
-			if (wert.isDirectory()) {
-				getValues(wert, inAktivität, listeTags, listeTyp);
+	public void getValues(File inDirectory, aktivität inAktivität, List<NodeTag> listeTags, List<NodeTyp> listeTyp)
+			throws ExceptionParser, IOException {
+
+		File[] entries = inDirectory.listFiles();
+		for (File tempFile : entries) {
+			if (tempFile.isDirectory()) {
+				getValues(tempFile, inAktivität, listeTags, listeTyp);
 			} else {
-				String extension = this.getFileExtendsion(wert);
+				String extension = this.getFileExtendsion(tempFile);
+				if (inAktivität == aktivität.schreiben) {
+					if (tempFile.getName().contains("menudata.js")) {
+						File f = new File( tempFile.getPath() );
+						FileInputStream inputStream= new FileInputStream(f);
+						InputStreamReader inputStreamReader= new InputStreamReader(inputStream);
+						
+						BufferedReader mbufferedReader = new BufferedReader(inputStreamReader);
+						
+						StringBuilder stringBuilder = new StringBuilder();
+						
+						stringBuilder.append(mbufferedReader.readLine());
+						while(mbufferedReader.ready())
+						{
+							stringBuilder.append("\r\n");
+							stringBuilder.append(mbufferedReader.readLine());
+						}
+						mbufferedReader.close();
+						
+						String outputText = stringBuilder.toString().replace(FileUtils.getRelIndexName(),FileUtils.getRelDxygeDokuName());
+						
+						String name = tempFile.getAbsolutePath();
+						tempFile.delete();
+
+						BufferedWriter bw = new BufferedWriter(new FileWriter(name));
+						bw.write(outputText);
+						bw.close();
+					}
+				}
 				if (extension.equals("html") || extension.equals("htm")) {
-					System.out.println(
-							String.format("%s %s", wert.isDirectory() ? "dir: " : "file:", wert.getAbsolutePath()));
+					System.out.println(String.format("%s %s", tempFile.isDirectory() ? "dir: " : "file:",
+							tempFile.getAbsolutePath()));
 					Reader reader = null;
 					try {
-						reader = new FileReader(wert.getAbsolutePath());
-						String fileName = wert.getName();
-						if (!wert.getName().contains("trace_data")) {
-							if (!wert.getName().startsWith("$")) {
+						reader = new FileReader(tempFile.getAbsolutePath());
+						String fileName = tempFile.getName();
+						if (!tempFile.getName().contains("trace_data")) {
+							if (!tempFile.getName().startsWith("$")) {
 								String ausgabe = readData(reader, fileName, inAktivität, listeTags, listeTyp);
 								if (inAktivität == aktivität.schreiben) {
-									String name = wert.getAbsolutePath();
-									wert.delete();
+									String name = tempFile.getAbsolutePath();
+									tempFile.delete();
 
 									String newName;
-									if (wert.getName().equals(FileName.getRelIndexName())) {
+									if (tempFile.getName().equals(FileUtils.getRelIndexName())) {
 										GenerateHTML.printHTMLFrame(name);
 									}
-									newName = name.replace(FileName.getRelIndexName(), FileName.getRelDxygeDokuName());
+									newName = name.replace(FileUtils.getRelIndexName(),
+											FileUtils.getRelDxygeDokuName());
 									FileWriter fw = new FileWriter(newName);
 									BufferedWriter bw = new BufferedWriter(fw);
 									bw.write(ausgabe);
@@ -154,7 +193,13 @@ public class ReadData {
 	}
 
 	/**
+	 * Parse HTML-File
 	 * 
+	 * The Parser reads the HTML-File and puffers the values in output. If the
+	 * parser starts reading a keyword, that bytes are buffered in reserve until
+	 * reading the keyword is either finished successfully, or reading something
+	 * else triggered a wrong alaram. In this case, that buffer reserve is just
+	 * added to output to ensure leaving a correct file.
 	 * 
 	 * @param inReader
 	 * @param fileName
@@ -162,7 +207,7 @@ public class ReadData {
 	 * @param listeNodeTag
 	 * @param listeNodeTyp
 	 * @return
-	 * @throws IOException 
+	 * @throws IOException
 	 * @throws Exception
 	 */
 	public String readData(Reader inReader, String fileName, aktivität inAktivität, List<NodeTag> listeNodeTag,
@@ -172,7 +217,7 @@ public class ReadData {
 		StringBuilder nameNummer = new StringBuilder();
 		StringBuilder nummber = new StringBuilder();
 
-		StringBuilder ausgabe = new StringBuilder();
+		StringBuilder output = new StringBuilder();
 
 		StringBuilder reserve = new StringBuilder();
 
@@ -192,7 +237,7 @@ public class ReadData {
 					}
 				} else {
 					if (aktivität.schreiben == inAktivität) {
-						ausgabe.append((char) ch);
+						output.append((char) ch);
 					}
 				}
 				break;
@@ -211,6 +256,7 @@ public class ReadData {
 						zustand = status.LESE_BUCHSTABE;
 						if (aktivität.schreiben == inAktivität) {
 							reserve.append((char) ch);
+							output.append(reserve.toString());
 						}
 					}
 				}
@@ -224,9 +270,10 @@ public class ReadData {
 						reserve.append((char) ch);
 					}
 				} else {
-					zustand = status.stateError;
+					zustand = status.LESE_BUCHSTABE;
 					if (aktivität.schreiben == inAktivität) {
 						reserve.append((char) ch);
+						output.append(reserve.toString());
 					}
 				}
 				break;
@@ -243,9 +290,10 @@ public class ReadData {
 							reserve.append((char) ch);
 						}
 					} else {
-						zustand = status.stateError;
+						zustand = status.LESE_BUCHSTABE;
 						if (aktivität.schreiben == inAktivität) {
 							reserve.append((char) ch);
+							output.append(reserve.toString());
 						}
 					}
 				}
@@ -270,10 +318,7 @@ public class ReadData {
 								reserve.append((char) ch);
 							}
 						} else {
-							zustand = status.stateError;
-							if (aktivität.schreiben == inAktivität) {
-								reserve.append((char) ch);
-							}
+							throw new ExceptionParser("Wort and er falschen Stelle");
 						}
 					}
 				}
@@ -335,11 +380,9 @@ public class ReadData {
 								reserve.append((char) ch);
 							}
 						} else {
-							zustand = status.stateError;
-							if (aktivität.schreiben == inAktivität) {
-								reserve.append((char) ch);
-							}
+							throw new ExceptionParser("Wert1");
 						}
+
 					}
 				}
 				break;
@@ -360,8 +403,9 @@ public class ReadData {
 							break;
 						case schreiben:
 							reserve.append((char) ch);
-							ausgabe.append(this.ausgabeLink(reserve.toString(), nameTagTyp.toString(),
+							output.append(this.ausgabeLink(reserve.toString(), nameTagTyp.toString(),
 									nameTag.toString(), nameNummer.toString()));
+							reserve.setLength(0);
 							break;
 						}
 					} else {
@@ -375,8 +419,9 @@ public class ReadData {
 								break;
 							case schreiben:
 								reserve.append((char) ch);
-								ausgabe.append(this.ausgabeLink(reserve.toString(), nameTagTyp.toString(),
+								output.append(this.ausgabeLink(reserve.toString(), nameTagTyp.toString(),
 										nameTag.toString(), nameNummer.toString()));
+								reserve.setLength(0);
 								break;
 							}
 						} else {
@@ -404,8 +449,9 @@ public class ReadData {
 							break;
 						case schreiben:
 							reserve.append((char) ch);
-							ausgabe.append(this.ausgabeQuelle(reserve.toString(), nameTagTyp.toString(),
+							output.append(this.ausgabeQuelle(reserve.toString(), nameTagTyp.toString(),
 									nameNummer.toString()));
+							reserve.setLength(0);
 							break;
 						}
 					} else {
@@ -424,8 +470,9 @@ public class ReadData {
 									break;
 								case schreiben:
 									reserve.append((char) ch);
-									ausgabe.append(this.ausgabeQuelle(reserve.toString(), nameTagTyp.toString(),
+									output.append(this.ausgabeQuelle(reserve.toString(), nameTagTyp.toString(),
 											nameNummer.toString()));
+									reserve.setLength(0);
 									break;
 								}
 							} else {
@@ -434,7 +481,7 @@ public class ReadData {
 								case einlesen:
 									break;
 								case schreiben:
-									ausgabe.append(reserve.toString());
+									output.append(reserve.toString());
 									break;
 								}
 							}
@@ -449,16 +496,14 @@ public class ReadData {
 						reserve.append((char) ch);
 					}
 				} else {
-					if (ch == '[') {
+					if (ch == ']') {
 						zustand = status.LESE_BUCHSTABE;
 						if (aktivität.schreiben == inAktivität) {
-							reserve.append((char) ch);
+							output.append((char) ch);
 						}
 					} else {
-						zustand = status.stateError;
-						if (aktivität.schreiben == inAktivität) {
-							reserve.append((char) ch);
-						}
+						// Hier darf nichts mehr kommen.
+						throw new ExceptionParser("Nach Numer kommt ein Text");
 					}
 				}
 				break;
@@ -485,7 +530,7 @@ public class ReadData {
 				break;
 			}
 		}
-		return ausgabe.toString();
+		return output.toString();
 	}
 
 	/**
@@ -510,7 +555,8 @@ public class ReadData {
 	}
 
 	/**
-	 * Verifies whether the link 
+	 * Verifies whether the link
+	 * 
 	 * @param inTag
 	 * @param listeTag
 	 * @throws Exception
@@ -554,12 +600,11 @@ public class ReadData {
 		for (NodeSource node : nodeQuelleList) {
 			if (node.getName().equals(inTag) & node.getNummer().equals(inNummer)) {
 				StringBuilder errorMessage = new StringBuilder();
-				errorMessage.append(String.format("Multiple defined Tag \"%s\"\n",inTag.toString()));
-				for (NodeSource nodeError : nodeQuelleList)
-				{
-					if (nodeError.getName().equals(inTag) & nodeError.getNummer().equals(inNummer))
-					{
-						errorMessage.append(String.format("Tag \"%s\" is already declared in: %s", inTag,nodeError.getFileName()));
+				errorMessage.append(String.format("Multiple defined Tag \"%s\"\n", inTag.toString()));
+				for (NodeSource nodeError : nodeQuelleList) {
+					if (nodeError.getName().equals(inTag) & nodeError.getNummer().equals(inNummer)) {
+						errorMessage.append(
+								String.format("Tag \"%s\" is already declared in: %s", inTag, nodeError.getFileName()));
 					}
 				}
 				throw new ExceptionParser(errorMessage.toString());
