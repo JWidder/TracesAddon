@@ -42,12 +42,12 @@ public class ReadDataTest {
 		listeNodeTyp.add(new NodeTyp("Test"));
 
 		List<NodeTag> listeNodeTag = new ArrayList<>();
-		listeNodeTag.add(new NodeTag("Cust"));
-		listeNodeTag.add(new NodeTag("Det"));
+		listeNodeTag.add(new NodeTag("Custt"));
+		listeNodeTag.add(new NodeTag("Dett"));
 
 		ReadData readData = new ReadData(listeNodeTag, listeNodeTyp);
 
-		String input = "test [$Test $Cust 2] Ende [$Test $Cust 23] ";
+		String input = "test [$Test $Custt 2] Ende [$Test $Custt 23] ";
 		StringReader testInput = new StringReader(input);
 		readData.readData(testInput, "FileName", aktivität.einlesen, listeNodeTag, listeNodeTyp);
 		testInput.close();
@@ -59,12 +59,12 @@ public class ReadDataTest {
 
 		assertEquals(2, readData.getNodeLink().size());
 		assertEquals("Test", readData.getNodeLink().get(0).getTyp());
-		assertEquals("Cust", readData.getNodeLink().get(0).getName());
+		assertEquals("Custt", readData.getNodeLink().get(0).getName());
 		assertEquals("2", readData.getNodeLink().get(0).getNummer());
 
 		assertEquals(2, readData.getNodeLink().size());
 		assertEquals("Test", readData.getNodeLink().get(1).getTyp());
-		assertEquals("Cust", readData.getNodeLink().get(1).getName());
+		assertEquals("Custt", readData.getNodeLink().get(1).getName());
 		assertEquals("23", readData.getNodeLink().get(1).getNummer());
 	}
 
@@ -76,12 +76,12 @@ public class ReadDataTest {
 	public void testReadDataQuelle() throws Exception {
 		List<NodeTyp> listeNodeTyp = new ArrayList<>();
 		List<NodeTag> listeNodeTag = new ArrayList<>();
-		listeNodeTag.add(new NodeTag("Cust"));
-		listeNodeTag.add(new NodeTag("Det"));
+		listeNodeTag.add(new NodeTag("Custt"));
+		listeNodeTag.add(new NodeTag("Dett"));
 
 		ReadData readData = new ReadData(listeNodeTag, listeNodeTyp);
 
-		String input = "test [$Cust 2] Ende [$Cust 23] ";
+		String input = "test [$Custt 2] Ende [$Custt 23] ";
 		StringReader testInput = new StringReader(input);
 		readData.readData(testInput, "FileName", aktivität.einlesen, listeNodeTag, listeNodeTyp);
 		testInput.close();
@@ -93,11 +93,11 @@ public class ReadDataTest {
 		assertEquals(input, result);
 
 		assertEquals(2, readData.getNodeQuelle().size());
-		assertEquals("Cust", readData.getNodeQuelle().get(0).getName());
+		assertEquals("Custt", readData.getNodeQuelle().get(0).getName());
 		assertEquals("2", readData.getNodeQuelle().get(0).getNummer());
 
 		assertEquals(2, readData.getNodeQuelle().size());
-		assertEquals("Cust", readData.getNodeQuelle().get(1).getName());
+		assertEquals("Custt", readData.getNodeQuelle().get(1).getName());
 		assertEquals("23", readData.getNodeQuelle().get(1).getNummer());
 	}
 
@@ -113,22 +113,22 @@ public class ReadDataTest {
 		listeNodeTyp.add(new NodeTyp("Test"));
 
 		List<NodeTag> listeNodeTag = new ArrayList<>();
-		listeNodeTag.add(new NodeTag("Cust"));
-		listeNodeTag.add(new NodeTag("Det"));
+		listeNodeTag.add(new NodeTag("Custt"));
+		listeNodeTag.add(new NodeTag("Dett"));
 
 		ReadData readData = new ReadData(listeNodeTag, listeNodeTyp);
 
-		StringReader testInput1 = new StringReader("test [$Cust 2] Ende [$Cust 23] ");
-		StringReader testInput2 = new StringReader("test [$Satisfies $Cust 2] Ende [$Satisfies $Cust 23] ");
+		StringReader testInput1 = new StringReader("test [$Custt 2] Ende [$Custt 23] ");
+		StringReader testInput2 = new StringReader("test [$Satisfies $Custt 2] Ende [$Satisfies $Custt 23] ");
 
 		readData.readData(testInput1, "FileName", aktivität.einlesen, listeNodeTag, listeNodeTyp);
 		readData.readData(testInput2, "FileName", aktivität.einlesen, listeNodeTag, listeNodeTyp);
 
 		assertEquals(2, readData.getNodeQuelle().size());
-		assertEquals("Cust", readData.getNodeQuelle().get(0).getName());
+		assertEquals("Custt", readData.getNodeQuelle().get(0).getName());
 		assertEquals("2", readData.getNodeQuelle().get(0).getNummer());
 
-		assertEquals("Cust", readData.getNodeQuelle().get(1).getName());
+		assertEquals("Custt", readData.getNodeQuelle().get(1).getName());
 		assertEquals("23", readData.getNodeQuelle().get(1).getNummer());
 	}
 
@@ -178,13 +178,13 @@ public class ReadDataTest {
 		listeNodeTyp.add(new NodeTyp("Test"));
 
 		List<NodeTag> listeNodeTag = new ArrayList<>();
-		listeNodeTag.add(new NodeTag("Cust"));
-		listeNodeTag.add(new NodeTag("Det"));
+		listeNodeTag.add(new NodeTag("Custt"));
+		listeNodeTag.add(new NodeTag("Dett"));
 
 		ReadData readData = new ReadData(listeNodeTag, listeNodeTyp);
 
-		StringReader testInput1 = new StringReader("test [$Cust 2] Ende [$Cust 23] ");
-		StringReader testInput2 = new StringReader("test [$Satisfies $Cust 2] Ende [$Satisfies $Det 23] ");
+		StringReader testInput1 = new StringReader("test [$Custt 2] Ende [$Custt 23] ");
+		StringReader testInput2 = new StringReader("test [$Satisfies $Custt 2] Ende [$Satisfies $Dett 23] ");
 
 		readData.readData(testInput1, "FileName", aktivität.einlesen, listeNodeTag, listeNodeTyp);
 		readData.readData(testInput2, "FileName", aktivität.einlesen, listeNodeTag, listeNodeTyp);
@@ -208,12 +208,12 @@ public class ReadDataTest {
 		listeNodeTyp.add(new NodeTyp("Test"));
 
 		List<NodeTag> listeNodeTag = new ArrayList<>();
-		listeNodeTag.add(new NodeTag("Cust"));
-		listeNodeTag.add(new NodeTag("Det"));
+		listeNodeTag.add(new NodeTag("Custt"));
+		listeNodeTag.add(new NodeTag("Dett"));
 
 		ReadData readData = new ReadData(listeNodeTag, listeNodeTyp);
 
-		StringReader testInput1 = new StringReader("test [$Cust 2] Ende [$Goal 23] ");
+		StringReader testInput1 = new StringReader("test [$Custt 2] Ende [$Goal 23] ");
 
 		try {
 			readData.readData(testInput1, "FileName", aktivität.einlesen, listeNodeTag, listeNodeTyp);
@@ -240,28 +240,21 @@ public class ReadDataTest {
 
 		List<NodeTag> listeNodeTag = new ArrayList<>();
 		listeNodeTag.add(new NodeTag("Custt"));
-		listeNodeTag.add(new NodeTag("Det"));
+		listeNodeTag.add(new NodeTag("Dett"));
 
 		ReadData readData = new ReadData(listeNodeTag, listeNodeTyp);
 
-		StringReader testInput1 = new StringReader("test [$Cust 2] Ende [$Cust 23] ");
-		StringReader testInput2 = new StringReader("test [$Testt $Cust 2] Ende [$Satisfies $Cust 23] ");
+		StringReader testInput1 = new StringReader("test [$Custt 2] Ende [$Custt 23] ");
+		StringReader testInput2 = new StringReader("test [$Test $Custt 2] Ende [$Satisfies $Custt 23] ");
 
 		try {
 			readData.readData(testInput1, "FileName", aktivität.einlesen, listeNodeTag, listeNodeTyp);
-			fail("Should have thrown an exception");
 		} catch (Exception e) {
 			assertTrue(true);
 		}
 
-		try {
-			readData.readData(testInput2, "FileName", aktivität.einlesen, listeNodeTag, listeNodeTyp);
-			fail("Should have thrown an exception");
-		} catch (Exception e) {
-			assertTrue(true);
-		}
 
-		assertEquals(0, readData.getNodeQuelle().size());
+		assertEquals(2, readData.getNodeQuelle().size());
 	}
 
 	/**
@@ -278,12 +271,12 @@ public class ReadDataTest {
 		listeNodeTyp.add(new NodeTyp("Test"));
 
 		List<NodeTag> listeNodeTag = new ArrayList<>();
-		listeNodeTag.add(new NodeTag("Cust"));
-		listeNodeTag.add(new NodeTag("Det"));
+		listeNodeTag.add(new NodeTag("Custt"));
+		listeNodeTag.add(new NodeTag("Dett"));
 
 		ReadData readData = new ReadData(listeNodeTag, listeNodeTyp);
 
-		StringReader testInput1 = new StringReader("test [$Cust 2] Ende [$Cust 2] ");
+		StringReader testInput1 = new StringReader("test [$Custt 2] Ende [$Custt 2] ");
 
 		try {
 			readData.readData(testInput1, "FileName", aktivität.einlesen, listeNodeTag, listeNodeTyp);
@@ -314,7 +307,7 @@ public class ReadDataTest {
 
 		ReadData readData = new ReadData(listeNodeTag, listeNodeTyp);
 
-		String input = "test [$Cust] Ende [$Cus] ";
+		String input = "test [$Custt] Ende [$Cus] ";
 		StringReader testInput1 = new StringReader(input);
 		readData.readData(testInput1, "FileName", aktivität.einlesen, listeNodeTag, listeNodeTyp);
 		testInput1.close();
@@ -340,12 +333,12 @@ public class ReadDataTest {
 		listeNodeTyp.add(new NodeTyp("Test"));
 
 		List<NodeTag> listeNodeTag = new ArrayList<>();
-		listeNodeTag.add(new NodeTag("Cust"));
-		listeNodeTag.add(new NodeTag("Det"));
+		listeNodeTag.add(new NodeTag("Custt"));
+		listeNodeTag.add(new NodeTag("Dett"));
 
 		ReadData readData = new ReadData(listeNodeTag, listeNodeTyp);
 
-		String input = "t [$Cust 1 ]";
+		String input = "t [$Custt 1 ]";
 		StringReader testInput1 = new StringReader(input);
 		readData.readData(testInput1, "FileName", aktivität.einlesen, listeNodeTag, listeNodeTyp);
 		testInput1.close();
@@ -376,7 +369,7 @@ public class ReadDataTest {
 
 		ReadData readData = new ReadData(listeNodeTag, listeNodeTyp);
 
-		String input = "t [$Cust 1 a]";
+		String input = "t [$Custt 1 a]";
 		try {
 			StringReader testInput1 = new StringReader(input);
 			readData.readData(testInput1, "FileName", aktivität.einlesen, listeNodeTag, listeNodeTyp);
@@ -406,7 +399,7 @@ public class ReadDataTest {
 
 		ReadData readData = new ReadData(listeNodeTag, listeNodeTyp);
 
-		String input = "t [$Test $Cust 1 a]";
+		String input = "t [$Test $Custt 1 a]";
 		try {
 			StringReader testInput1 = new StringReader(input);
 			readData.readData(testInput1, "FileName", aktivität.einlesen, listeNodeTag, listeNodeTyp);
@@ -437,7 +430,7 @@ public class ReadDataTest {
 		ReadData readData = new ReadData(listeNodeTag, listeNodeTyp);
 
 		try {
-			String input = "t [$Test a $Cust 1 a]";
+			String input = "t [$Test a $Custt 1 a]";
 			StringReader testInput1 = new StringReader(input);
 			readData.readData(testInput1, "FileName", aktivität.einlesen, listeNodeTag, listeNodeTyp);
 			fail("Exception expected");
@@ -467,7 +460,7 @@ public class ReadDataTest {
 		ReadData readData = new ReadData(listeNodeTag, listeNodeTyp);
 
 		try {
-			String input = "t [$Test $Cust a 1]";
+			String input = "t [$Test $Custt a 1]";
 			StringReader testInput1 = new StringReader(input);
 			readData.readData(testInput1, "FileName", aktivität.einlesen, listeNodeTag, listeNodeTyp);
 			fail("Exception expected");
@@ -497,7 +490,7 @@ public class ReadDataTest {
 		ReadData readData = new ReadData(listeNodeTag, listeNodeTyp);
 
 		try {
-			String input = "t [$T£est $Cust 1]";
+			String input = "t [$T£est $Custt 1]";
 			StringReader testInput1 = new StringReader(input);
 			readData.readData(testInput1, "FileName", aktivität.einlesen, listeNodeTag, listeNodeTyp);
 			fail("Exception expected");
@@ -526,7 +519,7 @@ public class ReadDataTest {
 
 		ReadData readData = new ReadData(listeNodeTag, listeNodeTyp);
 
-		String input = "t [$1 Test $Cust 1]";
+		String input = "t [$1 Test $Custt 1]";
 		StringReader testInput1 = new StringReader(input);
 		readData.readData(testInput1, "FileName", aktivität.einlesen, listeNodeTag, listeNodeTyp);
 		testInput1 = new StringReader(input);

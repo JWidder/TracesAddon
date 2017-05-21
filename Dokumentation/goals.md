@@ -9,8 +9,7 @@ Doxygen genrates documentation based on information provided in teh source code.
 # Goals {#Goals}
 
 [$Goal 1]
-The postprocessor supports the user of the documentation with navigation 
-within the documentation.
+The postprocessor supports the user of the documentation to navigation within the documentation.
  
 [$Goal 2]
 The postprocessor gives an overwiew over the progress of the project.

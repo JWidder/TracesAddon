@@ -19,6 +19,7 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -114,30 +115,7 @@ public class ReadData {
 				String extension = this.getFileExtendsion(tempFile);
 				if (inAktivität == aktivität.schreiben) {
 					if (tempFile.getName().contains("menudata.js")) {
-						File f = new File( tempFile.getPath() );
-						FileInputStream inputStream= new FileInputStream(f);
-						InputStreamReader inputStreamReader= new InputStreamReader(inputStream);
-						
-						BufferedReader mbufferedReader = new BufferedReader(inputStreamReader);
-						
-						StringBuilder stringBuilder = new StringBuilder();
-						
-						stringBuilder.append(mbufferedReader.readLine());
-						while(mbufferedReader.ready())
-						{
-							stringBuilder.append("\r\n");
-							stringBuilder.append(mbufferedReader.readLine());
-						}
-						mbufferedReader.close();
-						
-						String outputText = stringBuilder.toString().replace(FileUtils.getRelIndexName(),FileUtils.getRelDxygeDokuName());
-						
-						String name = tempFile.getAbsolutePath();
-						tempFile.delete();
-
-						BufferedWriter bw = new BufferedWriter(new FileWriter(name));
-						bw.write(outputText);
-						bw.close();
+						FileUtils.replaceMenuData(tempFile);
 					}
 				}
 				if (extension.equals("html") || extension.equals("htm")) {
@@ -182,6 +160,11 @@ public class ReadData {
 		return;
 	}
 
+	/**
+	 *
+	 * @param inFile
+	 * @return
+	 */
 	private String getFileExtendsion(File inFile) {
 		String name = inFile.getName();
 		try {
@@ -347,7 +330,6 @@ public class ReadData {
 				} else {
 					if (Character.isWhitespace(ch)) {
 						// Erstes Wort erkannt
-						System.out.println(String.format(">>> %s", nameTag));
 						zustand = status.END_NEXT_IDENTIFIER;
 						if (aktivität.schreiben == inAktivität) {
 							reserve.append((char) ch);

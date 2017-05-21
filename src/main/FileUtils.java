@@ -15,11 +15,14 @@
 
 package main;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.InputStreamReader;
 
 /**
  * Die Klasse stellt die Namen der evrschiedenen Dateien bereit.
@@ -91,4 +94,31 @@ public class FileUtils {
 	public static String getRelIndexName() {
 		return ("index.html");
 	}
+
+	static void replaceMenuData(File tempFile) throws FileNotFoundException, IOException {
+		File f = new File(tempFile.getPath());
+		FileInputStream inputStream = new FileInputStream(f);
+		InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+
+		BufferedReader mbufferedReader = new BufferedReader(inputStreamReader);
+
+		StringBuilder fileContent = new StringBuilder();
+		fileContent.append(mbufferedReader.readLine());
+		while (mbufferedReader.ready()) {
+			fileContent.append("\r\n");
+			fileContent.append(mbufferedReader.readLine());
+		}
+		mbufferedReader.close();
+
+		String outputText = fileContent.toString().replace(FileUtils.getRelIndexName(),
+				FileUtils.getRelDxygeDokuName());
+
+		String name = tempFile.getAbsolutePath();
+		tempFile.delete();
+
+		BufferedWriter bw = new BufferedWriter(new FileWriter(name));
+		bw.write(outputText);
+		bw.close();
+	}
+
 }

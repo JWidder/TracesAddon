@@ -6,8 +6,8 @@ Traceability information give an overview over the project status. Based on this
 
 [$Prod 2]
 
-The integration of office docuemnts is possible. The documents are converted to HTML and the 
-link to th office docuemnt is replaced by a link to the HTML-File. 
+The integration of office docuemnts is possible. Convert the documents befor integration to HTML.
+Links to office docuemnts are replaces by links to the generated HTML-Files. 
 
 [$Prod 3] 
-The doxygen generated documentation remains fully usable without post processing. 
+The doxygen generated documentation remains fully usable. 
